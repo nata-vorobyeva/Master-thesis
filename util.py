@@ -366,6 +366,50 @@ def read_lb(path):
 
     return contexts_dict, questions_dict, answers_dict, question_context_dict
 
+
+def read_context_lb(path):
+    with open(path, 'rb') as f:
+        squad_dict = json.load(f)
+    contexts_dict = {}
+    for line in squad_dict['data']:
+        context = line['text']
+        context_id = int(line['id'])
+        contexts_dict[context_id] = context
+
+    return contexts_dict
+
+
+def read_question_lb(path):
+    with open(path, 'rb') as f:
+        squad_dict = json.load(f)
+
+    answers_dict = {}
+    questions_dict = {}
+    question_context_dict = {}
+
+    for line in squad_dict['data']:
+        question = line['question']
+        question_id = int(line['question_id'])
+        questions_dict[question_id] = question
+        answer = {}
+        try:
+            context_id = int(line['context_id'])
+            answer['text'] = str(line['answer'])
+            answer['context_id'] = context_id
+            if str(line['answer'])[0] == " ":
+                answer['text'] = line['answer'].lstrip()
+
+            answers_dict[question_id] = answer
+            question_context_dict[question_id] = context_id
+        except KeyError:
+            answer['text'] = None
+            answer['context_id'] = None
+            answers_dict[question_id] = answer
+            question_context_dict[question_id] = None
+
+    return questions_dict, answers_dict, question_context_dict
+
+
 def add_end_idx(answers, contexts):
 
     """
